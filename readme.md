@@ -5,7 +5,8 @@ ACM Blockchain Network，即“碧蓝航线官方百合讨论分布式协议”�
 别想了，主网还没上线。
 ### 创建自己的网络
 1.修改blockchain.ts中的挖矿难度、NetworkID和初始区块信息\
-2.替换bootuser-pubkey.txt中的初始账户（账户名：admin）公钥。
+2.替换bootuser-pubkey.txt中的初始账户（账户名：admin）公钥。\
+3.自己做好交易广播协议、持续出块机制等东西（我没做 :D）。
 ### 搭建私链/联盟链
 同上，然后再把PoW改成PoA就行。
 ## Q&A
