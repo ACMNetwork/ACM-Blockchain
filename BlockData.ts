@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 import sha256 from "crypto-js/sha256";
 
-function computeStateChange(stateJson: object,transactions: object,environ: object): object{
+export function computeStateChange(stateJson: object,transactions: object,environ: object): object{
 	if(typeof stateJson != "object"){
 		return undefined; // Fail to compute
 	}
@@ -24,7 +24,7 @@ function computeStateChange(stateJson: object,transactions: object,environ: obje
 			continue; // SYSTEM ACCOUNT CAN'T SEND TRANSACTION
 		}
 		const verify = crypto.createVerify('SHA256');
-		verify.update(tx["sender"]+" SENDED AT "+tx["nonce"]+" TRANSACT "+tx["operation"]);
+		verify.update(tx["sender"]+" SENDED AT "+environ["networkID"]+":"+tx["nonce"]+" TRANSACT "+tx["operation"]);
 		verify.end();
 		if(!verify.verify(newStat["user"][tx["sender"]]["pubkey"], tx["signature"])){
 			continue; // signature error
@@ -210,7 +210,7 @@ function isObjectSame(object1: object, object2: object): boolean {
 	return true;
 }
 
-function validationStateChange(prevData:string,nextData:string): boolean{
+export function validationStateChange(prevData:string,nextData:string,networkID:number): boolean{
 	let prevDataObj: object = speterateData(prevData);
 	let nextDataObj: object = speterateData(prevData);
 	if(prevDataObj == undefined || nextDataObj == undefined){
@@ -219,5 +219,8 @@ function validationStateChange(prevData:string,nextData:string): boolean{
 	if(typeof prevDataObj != "object" || typeof nextDataObj != "object" || typeof prevDataObj["state"] != "object" || typeof nextDataObj["state"] != "object" || typeof nextDataObj["miner"] != "string" || typeof nextDataObj["transactions"] != "object"){
 		return false;
 	}
-	return isObjectSame(computeStateChange(prevDataObj["state"],nextDataObj["transactions"],{"miner":nextDataObj["miner"]}),nextDataObj["state"]);
+	if(nextDataObj["networkID"] != prevDataObj["networkID"] || networkID != prevDataObj["networkID"]){
+		return false;
+	}
+	return isObjectSame(computeStateChange(prevDataObj["state"],nextDataObj["transactions"],{"miner":nextDataObj["miner"],"networkID":nextDataObj["networkID"]}),nextDataObj["state"]);
 }

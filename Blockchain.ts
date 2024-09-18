@@ -3,6 +3,8 @@ import { validationStateChange,computeStateChange } from "./BlockData";
 import fs from 'fs';
 const { generateKeyPairSync } = require('crypto');
 
+const networkID = 3817;
+
 export class Blockchain {
   chain: Block[]; // 区块链
   difficulty: number; // 工作量证明难度
@@ -55,7 +57,8 @@ export class Blockchain {
 			}
 		},
 		transactions:[],
-		"miner":"acm.system"
+		miner:"acm.system",
+		networkID:networkID
 	}), "0");
   }
 
@@ -76,8 +79,9 @@ export class Blockchain {
   addTransactBlock(transactions: object,miner: string): void {
 	let data = JSON.stringify({
 		"transactions":transactions,
-		"state":computeStateChange(this.getLatestBlock().data,transactions,{"miner":miner}),
-		"miner":miner
+		"state":computeStateChange(this.getLatestBlock().data,transactions,{"miner":miner,"networkID":networkID}),
+		"miner":miner,
+		"networkID":networkID
 	});
 	let newBlock = new Block(this.chain.length,Date.now().toISOString(),data,this.getLatestBlock().hash);
     newBlock.mineBlock(this.difficulty);
@@ -100,7 +104,7 @@ export class Blockchain {
         return false;
       }
 	  // 检查执行层合法性
-	  if(!validationStateChange(previousBlock.data,currentBlock.data)){
+	  if(!validationStateChange(previousBlock.data,currentBlock.data,networkID)){
 		return false;
 	  }
     }
